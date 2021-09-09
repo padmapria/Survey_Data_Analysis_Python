@@ -1,12 +1,12 @@
-"""This module is to configure app to connect with database."""
+"""This module is to configure app to connect with database, centralized logging config."""
 
 import psycopg2
 import logging
 import os
 import sys,io
-from decouple import config
 from os import environ as env
 from dotenv import load_dotenv as load_dotenv
+path = os.getcwd()
 
 #https://stackoverflow.com/questions/41546883/what-is-the-use-of-python-dotenv
 load_dotenv(dotenv_path='configuration.env')
@@ -19,8 +19,19 @@ t_user = env['DB_USER']
 t_pw = env['DB_PASS']
 
 #Logging
+#Logs are generated in a seperate log folder
+def level_down(path):
+    proj_path= os.path.split(path)[0]
+    log_dir=os.path.join(proj_path, 'logs')
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir)
+    return log_dir
+    
+logFormatStr = '%(asctime)s  %(levelname)s - %(message)s'
+logging.basicConfig(filename=level_down(path) + '\logFile.log', format=logFormatStr, level=logging.INFO),
 logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+
+logger.info('DB started')
 
 #https://stackoverflow.com/questions/10598002/how-do-i-get-tables-in-postgres-using-psycopg2
 try:
