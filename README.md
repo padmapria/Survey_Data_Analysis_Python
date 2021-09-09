@@ -1,5 +1,4 @@
 # Survey_Data_Analysis_Python
-Survey_Data_Analysis_Python
 
 Designing RESTful API with Python-Flask and posgres using survey response dataset    
 
