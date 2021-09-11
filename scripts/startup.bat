@@ -6,6 +6,7 @@ cd %venv_root_dir%
 
 CALL activate_conda.bat
 
-CALL start_app.bat
+CALL configuration.bat
 
+CALL start_app.bat
 
