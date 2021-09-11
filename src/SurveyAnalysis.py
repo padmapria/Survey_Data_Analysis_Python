@@ -55,7 +55,7 @@ def find_benchmark_for_survey():
     try:
         
         id = request.args.get('id', default = 1, type = int)
-        logger.info("Calling /survey_distribution/id API for survey**** ")
+        logger.info("Calling /survey_distribution/id API for survey**** {}".format(id))
         print("Fetching distribution for survey =",id)
         sql_string = """
               SELECT
@@ -95,7 +95,7 @@ def find_benchmark_for_survey():
 @app.route('/survey_distribution/all')
 def find_benchmark():
      print("Fetching distribution for all survey");
-     logger.info("Calling /survey_distribution/all API **** ", id)
+     logger.info("Calling /survey_distribution/all API **** ")
      sql_string = """
          SELECT
          question_id,survey_id,
@@ -145,7 +145,7 @@ def computeDistributionForMoreThan50():
             print (dict(zip(columns, row)))          
         cursor.close()
         
-print("Avg score and Score Distribution for more than 50 answered")
+#print("Avg score and Score Distribution for more than 50 answered")
 #computeDistributionForMoreThan50()
 
 

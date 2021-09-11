@@ -12,7 +12,14 @@ from config import db_conn,env,logger
 BUCKET_NAME = env['BUCKET_NAME']
 PREFIX=env['PREFIX']
 
-      
+fetch_fileNames_sql="SELECT file_name from survey_details;"
+
+insert_survey_response ="""INSERT INTO survey_response (question_id, user_id, answer, survey_id,created_on) 
+                VALUES(%s,%s,%s,%s,%s);"""
+
+insert_survey_details = """INSERT INTO survey_details (file_name,created_on,s3_last_modified_on) 
+        VALUES (%s,%s,%s) RETURNING survey_id;"""
+        
 def download_s3_file():
     logger.info("Downloading file from  s3")
     client = boto3.client('s3', aws_access_key_id='', aws_secret_access_key='')
@@ -24,61 +31,66 @@ def download_s3_file():
     #https://stackoverflow.com/questions/35803027/retrieving-subfolders-names-in-s3-bucket-from-boto3
     response  = client.list_objects_v2(Bucket=BUCKET_NAME, Prefix=PREFIX )
     
-    #Fetching the list of files that are already in DB, to skip adding the files again
-    fetch_fileNames_sql="SELECT file_name from survey_details;"
+    #Fetching the list of files that are already in DB, to skip adding the files again 
     with db_conn.cursor() as cursor:
         cursor.execute(fetch_fileNames_sql)
         result = cursor.fetchall()
         existing_files=(list(sum(result, ())))      
         cursor.close()
 
+    logger.info("Files already existing in DB: {}".format(existing_files))
     #Fetching the list of files from S3    
     for object in response['Contents']:
         if(object['Key'].find(".csv")!=-1):
             if(object['Key'] in existing_files):
-                print("Contents of the file are already in DB, skipping re-adding the file **",object['Key'])
+                logger.info("Files already existing in DB and present in s3 : {}".format(object['Key']))
+                print("Contents of the file are already in DB, skipping reuploading the file **",object['Key'])
             else:
                 print("New File found in s3 **",object['Key'])
                 bucket_list.append(object['Key'])
                 lastModified.append(object['LastModified'])
             
-    print("List of Files to create entry in DB are **",bucket_list[0:10])
+    print("List of new files to create entry in DB are =",bucket_list[0:10])
+    logger.info("List of new files to create entry in DB are = {}".format(bucket_list[0:10]))
     
-    for i in range(len(bucket_list)):
-        BUCKET_FILE_NAME= bucket_list[i]
-        S3_LastModified=lastModified[i]
+    if not bucket_list:
+         logger.info("No new files to add to DB, ending the process !!!!")
+         print("No new files to add to DB, ending the process !!!!")
+    else:
+        for i in range(len(bucket_list)):
+            BUCKET_FILE_NAME= bucket_list[i]
+            S3_LastModified=lastModified[i]
+            
+            #https://stackoverflow.com/questions/8384737/extract-file-name-from-path-no-matter-what-the-os-path-format
+            head, LOCAL_FILE_NAME = os.path.split(BUCKET_FILE_NAME)
         
-        #https://stackoverflow.com/questions/8384737/extract-file-name-from-path-no-matter-what-the-os-path-format
-        head, LOCAL_FILE_NAME = os.path.split(BUCKET_FILE_NAME)
-    
-        #Downloading the file to local file system
-        client.download_file(BUCKET_NAME, BUCKET_FILE_NAME, LOCAL_FILE_NAME)
-        store_survey_details(BUCKET_FILE_NAME,S3_LastModified,LOCAL_FILE_NAME)
+            #Downloading the file to local file system
+            client.download_file(BUCKET_NAME, BUCKET_FILE_NAME, LOCAL_FILE_NAME)
+            store_survey_details(BUCKET_FILE_NAME,S3_LastModified,LOCAL_FILE_NAME)
     
             
                   
 def store_survey_details(BUCKET_FILE_NAME, S3_LastModified,LOCAL_FILE_NAME):
     
-    print("To create Survey details in DB for the file ** ",BUCKET_FILE_NAME)
-    logger.info("To create Survey details in DB for the file")
+    print("To create Survey details in DB for the file ** ",LOCAL_FILE_NAME)
+    logger.info("To create Survey details in DB for the file ** {}".format(LOCAL_FILE_NAME))
     with db_conn.cursor() as cur:
         survey_id= None
-        sql_string = """INSERT INTO survey_details (file_name,created_on,s3_last_modified_on) 
-        VALUES (%s,%s,%s) RETURNING survey_id;"""
-        
+               
         try:
-            cur.execute(sql_string, (BUCKET_FILE_NAME,dt.now(),S3_LastModified))
+            cur.execute(insert_survey_details, (BUCKET_FILE_NAME,dt.now(),S3_LastModified))
             survey_id = cur.fetchone()[0]
             db_conn.commit()
             
-            print("Survey details created in DB for the file ** ",BUCKET_FILE_NAME)
+            print("Survey details created in DB for the file ** ",LOCAL_FILE_NAME)
             cur.close()
             
             #Parse the file and store the contents to DB
             with open(LOCAL_FILE_NAME, 'r') as csvfile:
                 csv_data = csv.reader(csvfile) 
-                store_survey_response(csv_data,survey_id)
-                print("Survey response added in DB for the file ** ",BUCKET_FILE_NAME)
+                store_survey_response(csv_data,survey_id,BUCKET_FILE_NAME)
+                print("Survey response added in DB for the file ## ",LOCAL_FILE_NAME)
+                logger.info("Upload to DB completed *******")
                 
         except Exception as e:
                 print("exception"+cur.fetchall())
@@ -86,16 +98,15 @@ def store_survey_details(BUCKET_FILE_NAME, S3_LastModified,LOCAL_FILE_NAME):
 
 
 
-def store_survey_response(csv_data, survey_id):
-    print("To add survey response to DB")
-    logger.info("To add survey response to DB")
-    sql_string ="""INSERT INTO survey_response (question_id, user_id, answer, survey_id,created_on) 
-                VALUES(%s,%s,%s,%s,%s);"""
+def store_survey_response(csv_data, survey_id,LOCAL_FILE_NAME):
+    print("To add survey response in DB for the file ## ",LOCAL_FILE_NAME)
+    logger.info("To add survey response in DB for the file ## {}".format(LOCAL_FILE_NAME))
+    
     with db_conn.cursor() as cur:
         for idx, row in enumerate(csv_data):
             try:
                 if (row[0]) != 'questionId':
-                    cur.execute(sql_string, (row[0], row[1], row[2],survey_id,dt.now()))
+                    cur.execute(insert_survey_response, (row[0], row[1], row[2],survey_id,dt.now()))
                     db_conn.commit()
                 else:
                     print("Header found..Skipping the header !!")
