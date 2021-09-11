@@ -13,7 +13,7 @@ This example project demonstrate reading data stored in S3, storing it in local 
 
 ### The task performed by various python files (.py) present in the src folder are :-    
       
- configuration.env  --> For storing environment variables needed for the project
+ configuration.env  --> For storing environment variables needed for the project (configuration.bat if the application is run via conda environment)
   1) config.py   --> Centralized configuration to inialize DB connection, logging which will be imported by other python classes     
   2) CreateTables.py  --> Creating the DB tables need for the project
   3) ReadS3AndPopulateDB.py   -->  ingest the csv files from S3 and store relevant data in the Postgres database   
@@ -88,7 +88,7 @@ pip install -r requirements.txt
 Start posgres Server    
     
 ## Config the application and deploy the application    
-Change the DBNAME in the config file according to the database name you are using.    
+Change the DBNAME in the config file (configuration.env/configuration.bat) according to the database name you are using.    
 
 Start the application to test locally using the below command  
 python config.py    
