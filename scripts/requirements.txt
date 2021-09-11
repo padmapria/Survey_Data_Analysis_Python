@@ -1,0 +1,9 @@
+flask==1.1.1
+DateTime==4.3
+simplejson==3.17.5
+boto3==1.9.205
+boto==2.49.0
+python-dotenv==0.15.0
+psycopg2-binary~=2.8.6
+smart_open==1.8.4
+psycopg2=2.9.1

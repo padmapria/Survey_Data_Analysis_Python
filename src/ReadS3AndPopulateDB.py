@@ -39,6 +39,7 @@ def download_s3_file():
         cursor.close()
 
     logger.info("Files already existing in DB: {}".format(existing_files))
+   
     #Fetching the list of files from S3    
     for object in response['Contents']:
         if(object['Key'].find(".csv")!=-1):

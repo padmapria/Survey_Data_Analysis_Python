@@ -20,7 +20,7 @@ logger.info('Rest API Application started')
 @app.route('/surveys')
 def computeSummary():
    
-    print("Computing Summary")
+    print("Computing Survey Summary")
     logger.info("Calling /surveys API ****")
     sql_string = """
          SELECT
@@ -118,6 +118,7 @@ def find_benchmark():
             json_data.append(dict(zip(columns, row)))
         
         cursor.close()
+        print(json.dumps(json_data, indent=4, sort_keys=True))
         logger.info(json.dumps(json_data, indent=4, sort_keys=True))
         return json.dumps(json_data),{'content-type':'application/json'}
     
