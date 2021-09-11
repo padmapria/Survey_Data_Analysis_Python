@@ -48,17 +48,21 @@ NOTE: While working with Python, its recommended to use virtual environment to k
 ## Test the application
 Once the application is started, go to localhost on Postman to test the API.
 
-### To get Summary (Get Request).      
-127.0.0.1:5000/summary    
-
-
-
-
-### To get benchmark (Get Request)
-127.0.0.1:5000/benchmark 
-
-
+### To get Survey Summary (Get Request).      
+127.0.0.1:5000/surveys   
+[![surveys.jpg](https://i.postimg.cc/xTBD6kdZ/surveys.jpg)](https://postimg.cc/YhNs9CYN)
+     
       
+### To get survey_distribution, benchmark for a specific survey (Get Request)
+http://127.0.0.1:5000/survey_distribution?id=2
+[![survey-distri-id.jpg](https://i.postimg.cc/rmf7xsbQ/survey-distri-id.jpg)](https://postimg.cc/MMjs86zQ)
+     
+      
+### To get survey_distribution, benchmark for all surveys (Get Request)
+http://127.0.0.1:5000/survey_distribution/all
+[![survey-distri-all.jpg](https://i.postimg.cc/FK5fXsTW/survey-distri-all.jpg)](https://postimg.cc/YvR21kKY)
+
+           
 # To manually do the steps given in the steps 1 to 4, follow the below
 ## Create your local environment 
 conda init
