@@ -4,36 +4,50 @@ Designing RESTful API with Python-Flask and posgres using survey response datase
 
 This example project demonstrate reading data stored in S3, storing it in local DB for analysis, return the analysis via RESTful API with Python-Flask,      
 
-The steps done for this project are
-  1) Reading survey response loaded in CSV format from AWS S3 and incrementally ingesting to local database postgresDB     
-  2) Analysing the data in postgres to find, average score, benchmark and the score distribution    
-  3) Creating an API that provides access to the data analysis results, (average score, benchmark and the score distribution)   
-  4) Dockering the application    
+### The steps done for this project are
+  1) Creating DB tables needed for the project
+  2) Reading survey response loaded in CSV format from AWS S3 and incrementally ingesting to local database postgresDB (skipping the data injestion, if the file is already in DB)       
+  3) Analysing the data in postgres to find, average score, benchmark and the score distribution    
+  4) Creating an API that provides access to the data analysis results, (average score, benchmark and the score distribution)   
+  5) Dockering the application    
 
- You can download this project by cloning the repository:     
+### The task performed by various python files (.py) present in the src folder are :-    
+      
+ configuration.env  --> For storing environment variables needed for the project
+  1) config.py   --> Centralized configuration to inialize DB connection, logging which will be imported by other python classes     
+  2) CreateTables.py  --> Creating the DB tables need for the project
+  3) ReadS3AndPopulateDB.py   -->  ingest the csv files from S3 and store relevant data in the Postgres database   
+  4) SurveyAnalysis.py  --> computiing the average score and the score distribution, benchmark and Creation of Flask API for the same
 
+
+ You can download this project by cloning the repository:  
+  
 # Get the project code
 git clone https://github.com/padmapria/Survey_Data_Analysis_Python.git  
 NOTE: While working with Python, its recommended to use virtual environment to keep all the project's dependencies isolated from other projects.    
 
 # To automate creating conda environment and deploying the project,
-1) Clone this git repository in a folder, for example to the folder,  C:/survey_data_analysis 
+1) Clone this git repository in a folder, for example to the folder,  C:/Survey_Data_Analysis_Python 
 
 2) Edit the startup.bat located in the scripts folder of this git project.
    Modify the venv_root_dir     
      set venv_root_dir="D:\Survey_Data_Analysis_Python\scripts"      
      to     
-      set venv_root_dir="C:\survey_data_analysis\scripts"    
+      set venv_root_dir="C:\Survey_Data_Analysis_Python\scripts"    
       
       save the changes
       
  3) Edit the start_app.bat located in the scripts folder of this git project. Modify the path pointing to the python file.      
       python D:\Survey_Data_Analysis_Python\src\config.py     
       python D:\Survey_Data_Analysis_Python\src\CreateTables.py    
+      python D:\Survey_Data_Analysis_Python\src\ReadS3AndPopulateDB.py     
+      python D:\Survey_Data_Analysis_Python\src\SurveyAnalysis.py    
       
       to    
-      python C:\survey_data_analysis\src\config.py    
-      python C:\survey_data_analysis\src\CreateTables.py    
+      python C:\Survey_Data_Analysis_Python\src\config.py    
+      python C:\Survey_Data_Analysis_Python\src\CreateTables.py    
+      python C:\Survey_Data_Analysis_Python\src\ReadS3AndPopulateDB.py     
+      python C:\Survey_Data_Analysis_Python\src\SurveyAnalysis.py 
       
       save the changes
       
@@ -63,11 +77,11 @@ http://127.0.0.1:5000/survey_distribution/all
 [![survey-distri-all.jpg](https://i.postimg.cc/FK5fXsTW/survey-distri-all.jpg)](https://postimg.cc/YvR21kKY)
 
            
-# To manually do the steps given in the steps 1 to 4, follow the below
+# To manually perform the tasks given in the steps 1 to 4 are: 
 ## Create your local environment 
 conda init
-conda create -n survey_data_analysis python=3.7 anaconda     # To create the environment    
-activate survey_data_analysis     # To activate the environment    
+conda create -n Survey_Data_Analysis_Python python=3.7 anaconda     # To create the environment    
+activate Survey_Data_Analysis_Python     # To activate the environment    
 
 ## Install dependencies    
 pip install -r requirements.txt    
