@@ -23,8 +23,8 @@ ENV DB_PORT=5432
 ENV DB_NAME=postgres
 ENV DB_USER=postgres
 ENV DB_PASS=password
-ENV BUCKET_NAME=er-public-assets
-ENV PREFIX=analytics_assessment/
+ENV BUCKET_NAME=
+ENV PREFIX=
 
 RUN chmod +x start_app.sh
 
